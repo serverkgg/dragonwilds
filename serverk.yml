@@ -1,0 +1,258 @@
+# yaml-language-server: $schema=./serverk.schema.json
+schemaVersion: serverk.gg/v1
+kind: GamePackage
+
+metadata:
+  id: dragonwilds
+  name:
+    ar: "رونسكيب: دراقونوايلدز"
+    en: "RuneScape: Dragonwilds"
+  description:
+    ar: "سيرفر رونسكيب: دراقونوايلدز خاص بك، تبني فيه قاعدتك وتطوّر مهاراتك مع أصحابك حتى 6 لاعبين، ويبقى مابك كما تركته بين جلساتكم. يدخل أصحابك من الكمبيوتر و PlayStation و Xbox و Nintendo Switch 2 باسم الماب أو بكود الانضمام، وتضبط من اللوحة كلمات المرور والأدمن والكروس بلاي، وترفع منها مابك من جهازك ومودات pak، مع نسخ احتياطية تلقائية لمابك."
+    en: "Your own RuneScape: Dragonwilds server. Build your base and level your skills with your friends, up to 6 players, and your world stays as you left it between sessions. Friends on PC, PlayStation, Xbox and Nintendo Switch 2 join by world name or join code. From the panel you set the passwords, admins and crossplay, and upload your own world and pak mods, with automatic backups of your world."
+  tagline:
+    ar: واجه التنانين مع أصحابك على سيرفر دراقونوايلدز جاهز خلال دقائق
+    en: Take on the dragons with your friends, on a server ready in minutes
+  category: survival
+  logo: assets/logo.webp
+  banner: assets/banner.webp
+
+steam:
+  appId: 4019830
+
+resources:
+  minMemoryMb: 4096
+  recommendedMemoryMb: 8192
+  minDiskMb: 12288
+  playersPerMemoryGb: 1
+  maxRecommendedPlayers: 6
+
+container:
+  image: serverkgg/dragonwilds
+  runtime:
+    platform: linux
+    installBudgetMinutes: 10
+    bootBudgetMinutes: 2
+  ports:
+    - key: game
+      containerPort: 7777
+      protocol: udp
+      mirror: true
+      join: combined
+      name:
+        ar: دراقونوايلدز
+        en: Dragonwilds
+      hint:
+        ar: يجد أصحابك سيرفرك باسم الماب أو بكود الانضمام داخل اللعبة، أو يكتبون هذا العنوان للاتصال المباشر.
+        en: Friends find your server by world name or join code in the game, or type this address to connect directly.
+      hostRange:
+        default: 26000
+        min: 26000
+        max: 26099
+    - key: beacon
+      containerPort: 8888
+      protocol: udp
+      mirror: true
+      join: separate
+      name:
+        ar: البيكون
+        en: Beacon
+      hint:
+        ar: منفذ يستخدمه دراقونوايلدز عند دخول اللاعبين، ولا يكتبه اللاعب أبدًا.
+        en: A port Dragonwilds uses when players join. Players never type it.
+      hostRange:
+        default: 26100
+        min: 26100
+        max: 26199
+
+backup:
+  only:
+    - RSDragonwilds/Saved/SaveGames/**
+    - RSDragonwilds/Saved/Config/LinuxServer/*.ini
+    - RSDragonwilds/Content/Paks/~mods/**
+    - .serverk-install.json
+  except:
+    - RSDragonwilds/Saved/Logs/**
+    - RSDragonwilds/Saved/Crashes/**
+
+reset:
+  keep:
+    - .steamcmd
+    - .steam
+    - Steam
+    - steamapps
+    - Engine/**
+    - RSDragonwilds/Binaries/**
+    - RSDragonwilds/Plugins/**
+    - RSDragonwilds/Content/Paks/RSDragonwilds-*
+    - RSDragonwilds/Content/Paks/global.*
+    - RSDragonwilds/Content/Splash/**
+    - RSDragonwildsServer.sh
+    - Manifest_*.txt
+
+presence:
+  name: player
+  id: playerId
+  fields:
+    - key: playerId
+      label:
+        ar: معرّف اللاعب
+        en: Player ID
+
+files:
+  protected:
+    - .serverk-install.json
+    - .serverk-staging/**
+  notable:
+    - match: RSDragonwilds/Saved/Config/LinuxServer/DedicatedServer.ini
+      label:
+        ar: إعدادات السيرفر
+        en: Server settings
+      icon: settings
+      color: "#c9873f"
+      restart: true
+      note:
+        ar: اسم السيرفر واسم الماب وكلمة مرور الماب والمالك والأدمن والمنصات. عدّلها من تبويب الإعدادات، لأن دراقونوايلدز يعيد كتابة هذا الملف في كل تشغيل ويحذف منه كلمة مرور الأدمن، ونحن نكتبها له قبل كل تشغيل. عدّل الملف والسيرفر متوقف فقط، ولا تغيّر ServerGuid.
+        en: Your server name, world name, world password, owner, admins and platforms. Change them from the Settings tab, because Dragonwilds rewrites this file at every start and removes the admin password from it, and we write it back before every start. Edit the file only while the server is stopped, and don't change ServerGuid.
+    - match: RSDragonwilds/Saved/SaveGames
+      label:
+        ar: ماباتك
+        en: Your worlds
+      icon: map
+      color: "#5ba32b"
+      note:
+        ar: كل ماب ملف ‎.sav واحد باسم الماب، ويحمّل السيرفر عند التشغيل الملف الذي يطابق اسم الماب في تبويب الإعدادات، ولا يقرأ المجلدات الفرعية. لا تغيّر أسماءها ولا ترفع ملفات فوقها والسيرفر شغّال، وخذ نسخة احتياطية قبل أي تعديل هنا.
+        en: Each world is one .sav file named after the world, and at every start the server loads the file that matches the world name in the Settings tab and reads no subfolder. Don't rename them or upload over them while the server is up, and take a backup before you touch anything here.
+    - match: RSDragonwilds/Content/Paks/~mods
+      label:
+        ar: المودات
+        en: Mods
+      icon: puzzle
+      color: "#d05353"
+      restart: true
+      note:
+        ar: ملفات المودات بصيغة ‎.pak مع ملفات ‎.utoc و ‎.ucas الخاصة بها. يلزم أن يملك كل لاعب المودات نفسها.
+        en: Mod files in .pak format, with their .utoc and .ucas files. Every player needs the same mods.
+    - match: RSDragonwilds/Saved/Logs
+      label:
+        ar: السجلات
+        en: Logs
+      icon: box
+      color: "#7a8290"
+      note:
+        ar: سجلات سيرفرك، وأحدثها RSDragonwilds.log. احذفها متى أردت.
+        en: Your server logs, the newest in RSDragonwilds.log. Delete them whenever you like.
+
+guideTags:
+  - id: start
+    name:
+      ar: ابدأ من هنا
+      en: Start here
+  - id: features
+    name:
+      ar: مميزات
+      en: Features
+
+guides:
+  - id: getting-started
+    title:
+      ar: البدء بسيرفرك
+      en: Getting started
+    summary:
+      ar: شغّل سيرفر دراقونوايلدز، واكتب معرّف اللاعب للمالك، وادخله مع أصحابك باسم الماب.
+      en: Get your Dragonwilds server running, set the owner's player ID, and join it with your friends by world name.
+    tags:
+      - start
+    surfaces:
+      - overview
+      - setup
+    bodyPath:
+      ar: guides/getting-started/ar.md
+      en: guides/getting-started/en.md
+  - id: access
+    title:
+      ar: اسم الماب وكود الانضمام والعنوان
+      en: World name, join code and address
+    summary:
+      ar: طرق الدخول الثلاث، وكلمة مرور الماب، والكروس بلاي، وما تفعله عندما لا يجد أصحابك سيرفرك.
+      en: The three ways to join, the world password, crossplay, and what to do when your friends can't find your server.
+    tags:
+      - start
+    surfaces:
+      - overview
+      - panel
+    bodyPath:
+      ar: guides/access/ar.md
+      en: guides/access/en.md
+  - id: worlds
+    title:
+      ar: المابات ورفعها من جهازك
+      en: Worlds and uploading yours
+    summary:
+      ar: ارفع ماب Custom أو Creative من جهازك، وبدّل بين ماباتك باسم الماب، وأنشئ مابًا جديدًا.
+      en: Upload a Custom or Creative world from your PC, switch between worlds by name, and create a new one.
+    tags:
+      - features
+    surfaces:
+      - panel
+      - backups
+    bodyPath:
+      ar: guides/worlds/ar.md
+      en: guides/worlds/en.md
+  - id: players
+    title:
+      ar: اللاعبون والأدمن والحظر
+      en: Players, admins and bans
+    summary:
+      ar: من المتصل الآن، والمالك والأدمن وكلمة مرور الأدمن، والطرد والحظر داخل اللعبة.
+      en: Who's on now, the owner, admins and the admin password, and kicking and banning in the game.
+    tags:
+      - features
+    surfaces:
+      - panel
+      - console
+    bodyPath:
+      ar: guides/players/ar.md
+      en: guides/players/en.md
+  - id: mods
+    title:
+      ar: المودات
+      en: Mods
+    summary:
+      ar: ارفع مودات pak من Nexus Mods، ووقّفها أو أزلها، واعرف لماذا لا تشتغل مودات UE4SS.
+      en: Upload pak mods from Nexus Mods, turn them off or remove them, and see why UE4SS mods don't run.
+    tags:
+      - features
+    surfaces:
+      - panel
+    bodyPath:
+      ar: guides/mods/ar.md
+      en: guides/mods/en.md
+  - id: updates
+    title:
+      ar: التحديثات وتطابق الإصدار
+      en: Updates and matching versions
+    summary:
+      ar: لماذا يلزم أن يطابق إصدار السيرفر إصدار اللعبة، وكيف نحدّث سيرفرك، ولاعبو أجهزة الكونسول بعد التحديث.
+      en: Why the server must match the game version, how we update your server, and console players after an update.
+    tags:
+      - start
+    surfaces:
+      - overview
+    bodyPath:
+      ar: guides/updates/ar.md
+      en: guides/updates/en.md
+  - id: performance
+    title:
+      ar: الأداء والرام
+      en: Performance and RAM
+    summary:
+      ar: الرام لكل عدد من اللاعبين، وعدد اللاعبين الأقصى، وما تفعله عندما لا تكفي الرام.
+      en: RAM by player count, max players, and what to do when the RAM runs short.
+    tags:
+      - features
+    surfaces:
+      - overview
+    bodyPath:
+      ar: guides/performance/ar.md
+      en: guides/performance/en.md

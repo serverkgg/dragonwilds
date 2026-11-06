@@ -1,0 +1,14 @@
+#!/bin/bash
+set -euo pipefail
+
+exec stdbuf -oL "$@" > >(
+	trap '' INT TERM
+	exec sed -u -E \
+		-e 's/((join ?code|password ?hash|admin ?password|world ?password)[^[:alnum:]]{0,4}).*$/\1[hidden]/I' \
+		-e t \
+		-e 's/(password)\[.*$/\1[hidden]/I' \
+		-e t \
+		-e 's/([?&]password=)[^[:space:]]*/\1[hidden]/Ig' \
+		-e t \
+		-e 's/(password[^[:alnum:]]{0,4}).*$/\1[hidden]/I'
+) 2>&1
